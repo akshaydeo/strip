@@ -2,7 +2,7 @@
 
 A utility to comment/uncomment the un-necessary function calls during the builds.
 
-> Yet to complete :-)
+> This is in development
 
 ## Example
 
@@ -21,13 +21,25 @@ You can use Strip as a part of the build system, to skip the calls like `logger.
 ### Command line
 
 ```bash
-strip --pkg pname --call pname.D --call pname.E -r --vendor  
+strip -pkg log -call log.Println -path demo/ -v -r
 ``` 
 
 | Param | Meaning| 
 |---|---|
-|--pkg|Package name to consider|
-|--call|Calls to process|
+|-pkg|Package name to consider|
+|-call|Calls to process|
 |-r|Recursive|
-|--unstrip | Revert | 
+|-u | Revert the changes done by strip call|
+|-v|Verbose logging| 
 
+
+
+## Tests
+
+
+### With logrus
+- DebugLevel: 1940 ms
+- ErrorLevel: 1657 ms
+- Stripped: 1621 ms
+
+36 ms saved against 10k operations :-|

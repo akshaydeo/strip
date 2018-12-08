@@ -3,5 +3,5 @@ package main
 import "testing"
 
 func Test_indexFiles(t *testing.T) {
-	getGoFiles(".",false)
+	getGoFiles(".",true,false)
 }

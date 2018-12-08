@@ -18,21 +18,13 @@ func commentFunctionCalls(fname, pkg, fun string) (bool, error) {
 		color.White("- %s", fname)
 	}
 	modified := false
+	stripImport := true
 	fileSet := token.NewFileSet() // positions are relative to fileSet
 	node, err := parser.ParseFile(fileSet, fname, nil, parser.ParseComments)
 	if err != nil {
 		return false, err
 	}
-	//----------------------------------------------------------------------------------------------
-	// Removing imports
-	//----------------------------------------------------------------------------------------------
-	for _, imps := range node.Imports {
-		if strings.Replace(imps.Path.Value, "\"", "", -1) == pkg {
-			// Commenting out import
-			modified = true
-			imps.Path.Value = fmt.Sprintf("//%s", imps.Path.Value)
-		}
-	}
+
 	//----------------------------------------------------------------------------------------------
 	// Finding calls and commenting them out
 	//----------------------------------------------------------------------------------------------
@@ -60,12 +52,26 @@ func commentFunctionCalls(fname, pkg, fun string) (bool, error) {
 							modified = true
 							//fmt.Println("Got function call\n commenting it")
 							selector.X.(*ast.Ident).Name = fmt.Sprintf("//%s", selector.X.(*ast.Ident).Name)
+						} else {
+							stripImport = false
 						}
 					}
 				}
 			}
 		}
 
+	}
+	if stripImport {
+		//----------------------------------------------------------------------------------------------
+		// Removing imports
+		//----------------------------------------------------------------------------------------------
+		for _, imps := range node.Imports {
+			if strings.Replace(imps.Path.Value, "\"", "", -1) == pkg {
+				// Commenting out import
+				modified = true
+				imps.Path.Value = fmt.Sprintf("//%s", imps.Path.Value)
+			}
+		}
 	}
 	if !modified {
 		return modified, nil
