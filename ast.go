@@ -15,7 +15,7 @@ import (
 // Method to comment all function calls from given file
 func commentFunctionCalls(fname, pkg, fun string) (bool, error) {
 	if verbose {
-		color.Yellow("- %s", fname)
+		color.White("- %s", fname)
 	}
 	modified := false
 	fileSet := token.NewFileSet() // positions are relative to fileSet
@@ -88,7 +88,7 @@ func commentFunctionCalls(fname, pkg, fun string) (bool, error) {
 
 func uncommentFunctionCalls(fname, pkg, fun string) (bool, error) {
 	if verbose {
-		color.Yellow("- %s", fname)
+		color.White("- %s", fname)
 	}
 	modified := false
 	fileSet := token.NewFileSet() // positions are relative to fileSet

@@ -8,17 +8,18 @@ import (
 )
 
 // Method to get list of go files from the give parent
-func getGoFiles(parent string, includeVendor bool) ([]string, error) {
+func getGoFiles(parent string, recursive, includeVendor bool) ([]string, error) {
 	if verbose {
-		color.Cyan("---------------------------")
-		color.Cyan("Collecting .go files")
-		color.Cyan("---------------------------")
+		color.Cyan("\n[Collecting .go files]")
 	}
 	var files []string
 	err := filepath.Walk(parent,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
+			}
+			if info.IsDir() && !recursive && info.Name() != strings.TrimSuffix(parent, "/") {
+				return filepath.SkipDir
 			}
 			// Skipping vendor directory
 			if info.IsDir() && info.Name() == "vendor" && !includeVendor {
@@ -29,7 +30,7 @@ func getGoFiles(parent string, includeVendor bool) ([]string, error) {
 				splits := strings.Split(info.Name(), ".")
 				if splits[len(splits)-1] == "go" {
 					if verbose {
-						color.Cyan("Adding %s", path)
+						color.White("- %s", path)
 					}
 					files = append(files, path)
 				}

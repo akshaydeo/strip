@@ -6,6 +6,7 @@ import (
 )
 
 var verbose = false
+var recursive = false
 
 func main() {
 	//----------------------------------------------------------------------------------------------
@@ -13,30 +14,27 @@ func main() {
 	//----------------------------------------------------------------------------------------------
 	var calls arrayFlags
 	pkg := flag.String("pkg", "", "Package associated with the calls")
-	recursive := flag.Bool("r", true, "Perform recursively")
+	flag.BoolVar(&recursive, "r", false, "Perform recursively")
 	path := flag.String("path", "./", "Path to perform changes")
 	unStrip := flag.Bool("u", false, "Revert stripping")
-	v := flag.Bool("v", true, "Verbose")
-	verbose = *v
+	flag.BoolVar(&verbose, "v", false, "Verbose")
 	flag.Var(&calls, "call", "Call you want to strip/unStrip")
 	flag.Parse()
 	//----------------------------------------------------------------------------------------------
 	// Listing all the go files
 	//----------------------------------------------------------------------------------------------
 	if verbose {
-		color.Green("---------------------------")
 		if *unStrip {
-			color.Green("UnStrip")
+			color.Green("[UnStrip]")
 		} else {
-			color.Green("Strip")
+			color.Green("[Strip]")
 		}
-		color.Green("---------------------------")
-		color.Green("Calls: %s\nPackage: %s\nPath: %s\nRecursively: %v", calls.String(), *pkg, *path, *recursive)
+		color.White("Calls: %s\nPackage: %s\nPath: %s\nRecursively: %v", calls.String(), *pkg, *path, recursive)
 	}
 	//----------------------------------------------------------------------------------------------
 	// Listing go files
 	//----------------------------------------------------------------------------------------------
-	files, err := getGoFiles(*path, false)
+	files, err := getGoFiles(*path, recursive, false)
 	if err != nil {
 		panic(err)
 	}
@@ -44,14 +42,18 @@ func main() {
 	// Modified each file one by one
 	//----------------------------------------------------------------------------------------------
 	var modifiedFiles []string
-	for _, file := range files {
-		for _, call := range calls.Get() {
+	for _, call := range calls.Get() {
+		if *unStrip {
+			if verbose {
+				color.Yellow("\n[UnStripping %s]", call)
+			}
+		} else {
+			if verbose {
+				color.Yellow("\n[Stripping %s]", call)
+			}
+		}
+		for _, file := range files {
 			if *unStrip {
-				if verbose {
-					color.Yellow("---------------------------")
-					color.Yellow("UnStripping %s", call)
-					color.Yellow("---------------------------")
-				}
 				modified, err := uncommentFunctionCalls(file, *pkg, call)
 				if err != nil {
 					panic(err)
@@ -60,11 +62,6 @@ func main() {
 					modifiedFiles = append(modifiedFiles, file)
 				}
 				continue
-			}
-			if verbose {
-				color.Yellow("---------------------------")
-				color.Yellow("Stripping %s", call)
-				color.Yellow("---------------------------")
 			}
 			modified, err := commentFunctionCalls(file, *pkg, call)
 			if err != nil {
@@ -75,9 +72,7 @@ func main() {
 			}
 		}
 	}
-	color.Red("------------------------")
-	color.Red("Total modified files: %d", len(modifiedFiles))
-	color.Red("------------------------")
+	color.Red("\n[Total modified files: %d]", len(modifiedFiles))
 	for _, file := range modifiedFiles {
 		color.White("- %s", file)
 	}
