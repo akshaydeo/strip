@@ -1,8 +1,0 @@
-stripe:
-  version: 1
-  stripe:
-    call:
-      - logger.Print
-      - log.Println
-  build:
-    - go build main.go

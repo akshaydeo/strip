@@ -16,22 +16,18 @@ logger.D(reflect.TypeOf(i).String())
 You can use Strip as a part of the build system, to skip the calls like `logger.D` during the final builds.
 
 
-## Configuration
-`Stripe` searches for `config.strip`, which is a yaml file, and performs the operations accordingly. If the file is not present, it will panic and will be a NOP.
+## Usage
 
+### Command line
 
-### Sample config file
+```bash
+strip --pkg pname --call pname.D --call pname.E -r --vendor  
+``` 
 
-```yaml
-stripe:
-  version: 1
-  stripe:
-    call:
-      - logger.Print
-      - log.Println
-  build:
-    - go build main.go
-```
-- This flow will, comment out all the function call references of `logger.Print` and `log.Println`
-- Then it will execute, commands listed under build
-- And at the end will revert the code back, i.e. uncomment the commented function calls.
+| Param | Meaning| 
+|---|---|
+|--pkg|Package name to consider|
+|--call|Calls to process|
+|-r|Recursive|
+|--unstrip | Revert | 
+
