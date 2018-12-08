@@ -13,13 +13,15 @@ import (
 )
 
 // Method to comment all function calls from given file
-func commentFunctionCalls(fname, pkg, fun string) error {
-	color.Green("Processing: %s", fname)
+func commentFunctionCalls(fname, pkg, fun string) (bool, error) {
+	if verbose {
+		color.Yellow("- %s", fname)
+	}
 	modified := false
 	fileSet := token.NewFileSet() // positions are relative to fileSet
 	node, err := parser.ParseFile(fileSet, fname, nil, parser.ParseComments)
 	if err != nil {
-		return err
+		return false, err
 	}
 	//----------------------------------------------------------------------------------------------
 	// Removing imports
@@ -66,7 +68,7 @@ func commentFunctionCalls(fname, pkg, fun string) error {
 
 	}
 	if !modified {
-		return nil
+		return modified, nil
 	}
 	// Writing file
 	// overwrite the file with modified version of ast.
@@ -81,16 +83,18 @@ func commentFunctionCalls(fname, pkg, fun string) error {
 		panic(err)
 	}
 	w.Flush()
-	return nil
+	return modified, nil
 }
 
-func uncommentFunctionCalls(fname, pkg, fun string) error {
-	color.Green("Processing: %s", fname)
+func uncommentFunctionCalls(fname, pkg, fun string) (bool, error) {
+	if verbose {
+		color.Yellow("- %s", fname)
+	}
 	modified := false
 	fileSet := token.NewFileSet() // positions are relative to fileSet
 	node, err := parser.ParseFile(fileSet, fname, nil, parser.ParseComments)
 	if err != nil {
-		return err
+		return false, err
 	}
 	//----------------------------------------------------------------------------------------------
 	// Checking all the comments
@@ -124,7 +128,7 @@ func uncommentFunctionCalls(fname, pkg, fun string) error {
 		}
 	}
 	if !modified {
-		return nil
+		return modified, nil
 	}
 	// Writing file
 	// overwrite the file with modified version of ast.
@@ -139,5 +143,5 @@ func uncommentFunctionCalls(fname, pkg, fun string) error {
 		panic(err)
 	}
 	w.Flush()
-	return nil
+	return modified, nil
 }

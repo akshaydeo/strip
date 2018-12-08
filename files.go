@@ -9,7 +9,11 @@ import (
 
 // Method to get list of go files from the give parent
 func getGoFiles(parent string, includeVendor bool) ([]string, error) {
-	color.Cyan("Collecting .go files")
+	if verbose {
+		color.Cyan("---------------------------")
+		color.Cyan("Collecting .go files")
+		color.Cyan("---------------------------")
+	}
 	var files []string
 	err := filepath.Walk(parent,
 		func(path string, info os.FileInfo, err error) error {
@@ -24,7 +28,9 @@ func getGoFiles(parent string, includeVendor bool) ([]string, error) {
 			if !info.IsDir() {
 				splits := strings.Split(info.Name(), ".")
 				if splits[len(splits)-1] == "go" {
-					color.Cyan("Adding %s", path)
+					if verbose {
+						color.Cyan("Adding %s", path)
+					}
 					files = append(files, path)
 				}
 			}
